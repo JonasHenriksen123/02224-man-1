@@ -2,318 +2,506 @@
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
 <nta>
 	<declaration>// Place global declarations here.
-</declaration>
+const int L = 0;
+const int R = 1;
+const int YELLOW = 0;
+const int BLACK = 1;
+
+// Sensor values
+const int INVALID = 2; // or BLOCKED
+const int NONE = -1;
+
+// Events
+urgent chan GoLeft;
+urgent chan GoRight;
+urgent chan FeedDrop[2];
+urgent chan BagDetectedLeft;
+urgent chan Tick;
+
+// DistributionBelt
+int distBeltDirection = L;
+
+// Sensor
+int sensorValue[2] = {NONE, NONE};
+
+// Bag
+int bagColor = BLACK;
+
+// Time count
+clock NOW;
+int DONE = 0;</declaration>
 	<template>
-		<name>Physical</name>
-		<location id="id0" x="-59" y="-221">
-		</location>
-		<location id="id1" x="-59" y="-102">
-		</location>
-		<location id="id2" x="-59" y="25">
-		</location>
-		<location id="id3" x="68" y="-221">
-			<name x="58" y="-255">Error</name>
+		<name>TickGen</name>
+		<location id="id0" x="-204" y="-42">
 		</location>
 		<init ref="id0"/>
-		<transition id="id4">
-			<source ref="id2"/>
+		<transition id="id1">
+			<source ref="id0"/>
 			<target ref="id0"/>
-			<label kind="select" x="-289" y="-119">feeddrop1!
-x:=0</label>
-			<nail x="-204" y="-102"/>
+			<label kind="synchronisation" x="-102" y="-59">Tick!</label>
+			<nail x="-127" y="0"/>
+			<nail x="-127" y="-102"/>
+		</transition>
+	</template>
+	<template>
+		<name>DistributionBelt</name>
+		<location id="id2" x="-374" y="-212">
+			<name x="-433" y="-221">Left</name>
+		</location>
+		<location id="id3" x="-76" y="-212">
+			<name x="-86" y="-246">Right</name>
+		</location>
+		<init ref="id2"/>
+		<transition id="id4">
+			<source ref="id3"/>
+			<target ref="id2"/>
+			<label kind="synchronisation" x="-238" y="-119">GoLeft?</label>
+			<label kind="assignment" x="-306" y="-93">distBeltDirection := L</label>
+			<nail x="-212" y="-127"/>
 		</transition>
 		<transition id="id5">
-			<source ref="id0"/>
+			<source ref="id2"/>
 			<target ref="id3"/>
-			<label kind="select" x="-41" y="-272">scan?</label>
-			<label kind="guard" x="-17" y="-263">x&lt;4
-x&gt;28</label>
+			<label kind="synchronisation" x="-238" y="-246">GoRight?</label>
+			<label kind="assignment" x="-306" y="-212">distBeltDirection := R</label>
 		</transition>
-		<transition id="id6">
-			<source ref="id1"/>
-			<target ref="id2"/>
-			<label kind="guard" x="-42" y="-68">x=80</label>
+	</template>
+	<template>
+		<name>ControlProgram</name>
+		<parameter>int feedBeltSide</parameter>
+		<declaration>clock c;
+
+int scannedBagColor = 0;</declaration>
+		<location id="id6" x="-3111" y="-2992">
+			<name x="-3094" y="-3009">Scan</name>
+			<label kind="invariant" x="-3094" y="-2992">c &lt;= 20</label>
+		</location>
+		<location id="id7" x="-3230" y="-2796">
+			<name x="-3281" y="-2813">GoA</name>
+		</location>
+		<location id="id8" x="-2983" y="-2796">
+			<name x="-2966" y="-2813">GoB</name>
+		</location>
+		<location id="id9" x="-3111" y="-2890">
+			<name x="-3221" y="-2924">ReadyForDist</name>
+		</location>
+		<location id="id10" x="-3111" y="-3162">
+			<name x="-3086" y="-3170">Idle</name>
+		</location>
+		<location id="id11" x="-3110" y="-3077">
+			<name x="-3086" y="-3094">WaitForScan</name>
+			<label kind="invariant" x="-3085" y="-3077">c &lt;=8</label>
+		</location>
+		<location id="id12" x="-3111" y="-2796">
+			<name x="-3094" y="-2830">Wait</name>
+		</location>
+		<init ref="id10"/>
+		<transition id="id13">
+			<source ref="id9"/>
+			<target ref="id12"/>
+			<label kind="guard" x="-3102" y="-2856">NOW &gt;= DONE</label>
 		</transition>
-		<transition id="id7">
-			<source ref="id0"/>
-			<target ref="id1"/>
-			<label kind="guard" x="-42" y="-178">x=40</label>
+		<transition id="id14">
+			<source ref="id12"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-3094" y="-2779">scannedBagColor == BLACK</label>
+			<label kind="synchronisation" x="-3051" y="-2754">GoRight!</label>
+		</transition>
+		<transition id="id15">
+			<source ref="id12"/>
+			<target ref="id7"/>
+			<label kind="guard" x="-3323" y="-2771">scannedBagColor == YELLOW</label>
+			<label kind="synchronisation" x="-3204" y="-2788">GoLeft!</label>
+		</transition>
+		<transition id="id16">
+			<source ref="id9"/>
+			<target ref="id8"/>
+			<label kind="guard" x="-3093" y="-2924">distBeltDirection == scannedBagColor
+&amp;&amp; distBeltDirection == R</label>
+			<nail x="-3026" y="-2890"/>
+		</transition>
+		<transition id="id17">
+			<source ref="id9"/>
+			<target ref="id7"/>
+			<label kind="guard" x="-3323" y="-2975">distBeltDirection == scannedBagColor
+&amp;&amp; distBeltDirection == L</label>
+			<nail x="-3213" y="-2898"/>
+		</transition>
+		<transition id="id18">
+			<source ref="id8"/>
+			<target ref="id10"/>
+			<label kind="assignment" x="-2881" y="-2873">c := 0,
+DONE := fint(ceil(NOW)) + (feedBeltSide == R ? 60 : 120)</label>
+			<nail x="-2754" y="-3009"/>
+		</transition>
+		<transition id="id19">
+			<source ref="id7"/>
+			<target ref="id10"/>
+			<label kind="assignment" x="-3612" y="-2898">c := 0,
+DONE := fint(ceil(NOW)) + (feedBeltSide == L ? 60 : 120)</label>
+			<nail x="-3392" y="-3026"/>
+		</transition>
+		<transition id="id20">
+			<source ref="id11"/>
+			<target ref="id6"/>
+			<label kind="guard" x="-3094" y="-3060">c == 8</label>
+			<label kind="assignment" x="-3094" y="-3043">c := 0,
+scannedBagColor := sensorValue[feedBeltSide]</label>
+		</transition>
+		<transition id="id21">
+			<source ref="id10"/>
+			<target ref="id11"/>
+			<label kind="guard" x="-3094" y="-3153">sensorValue[feedBeltSide] == INVALID</label>
+			<label kind="synchronisation" x="-3085" y="-3145">Tick?</label>
+			<label kind="assignment" x="-3085" y="-3128">c := 0</label>
+		</transition>
+		<transition id="id22">
+			<source ref="id6"/>
+			<target ref="id9"/>
+			<label kind="guard" x="-3102" y="-2966">c == 20</label>
+			<label kind="assignment" x="-3102" y="-2941">c := 0</label>
+		</transition>
+	</template>
+	<template>
+		<name>User</name>
+		<parameter>int feedSide</parameter>
+		<declaration>clock x;</declaration>
+		<location id="id23" x="-59" y="-280">
+		</location>
+		<location id="id24" x="-59" y="-119">
+			<name x="-102" y="-110">Wait</name>
+		</location>
+		<init ref="id23"/>
+		<transition id="id25">
+			<source ref="id24"/>
+			<target ref="id23"/>
+			<nail x="76" y="-195"/>
+		</transition>
+		<transition id="id26">
+			<source ref="id23"/>
+			<target ref="id24"/>
+			<label kind="synchronisation" x="-178" y="-221">FeedDrop[feedSide]!</label>
+			<label kind="assignment" x="-110" y="-195">x := 0</label>
 		</transition>
 	</template>
 	<template>
 		<name x="5" y="5">Bag</name>
 		<declaration>// Place local declarations here.
-</declaration>
-		<location id="id8" x="17" y="-314">
+clock c;
+int feedBelt;</declaration>
+		<location id="id27" x="17" y="-314">
 			<name x="-17" y="-357">Intitial</name>
 		</location>
-		<location id="id9" x="-170" y="-272">
+		<location id="id28" x="-170" y="-272">
 			<name x="-211" y="-289">A1L</name>
 			<label kind="invariant" x="-255" y="-280">c&lt;=2</label>
 		</location>
-		<location id="id10" x="195" y="-280">
+		<location id="id29" x="195" y="-280">
 			<name x="213" y="-289">A1R</name>
 			<label kind="invariant" x="246" y="-297">c&lt;=2</label>
 		</location>
-		<location id="id11" x="-170" y="-187">
+		<location id="id30" x="-170" y="-187">
 			<name x="-255" y="-195">SensorL</name>
 			<label kind="invariant" x="-153" y="-195">c&lt;=12</label>
 		</location>
-		<location id="id12" x="-170" y="-42">
+		<location id="id31" x="-170" y="-42">
 			<name x="-221" y="-51">B1L</name>
 			<label kind="invariant" x="-153" y="-51">c&lt;=12</label>
 		</location>
-		<location id="id13" x="-170" y="51">
+		<location id="id32" x="-170" y="51">
 			<name x="-221" y="34">B2L</name>
 			<label kind="invariant" x="-221" y="17">c&lt;=12</label>
 		</location>
-		<location id="id14" x="17" y="-8">
+		<location id="id33" x="17" y="-8">
 			<name x="7" y="-42">Waiting</name>
 		</location>
-		<location id="id15" x="-331" y="51">
+		<location id="id34" x="-331" y="51">
 			<name x="-364" y="17">CLL</name>
 			<label kind="invariant" x="-390" y="34">c&lt;=27</label>
 		</location>
-		<location id="id16" x="-170" y="136">
+		<location id="id35" x="-170" y="136">
 			<name x="-180" y="102">CLR</name>
 			<label kind="invariant" x="-229" y="127">c&lt;=27</label>
 		</location>
-		<location id="id17" x="-331" y="204">
+		<location id="id36" x="-331" y="204">
 			<name x="-373" y="178">EL</name>
 			<label kind="invariant" x="-407" y="212">c&lt;=12</label>
 		</location>
-		<location id="id18" x="-170" y="204">
+		<location id="id37" x="-170" y="204">
 			<name x="-180" y="170">DL</name>
 			<label kind="invariant" x="-180" y="221">c&lt;=23</label>
 		</location>
-		<location id="id19" x="17" y="204">
+		<location id="id38" x="17" y="204">
 			<name x="7" y="170">F</name>
 			<label kind="invariant" x="7" y="221">c&lt;=31</label>
 		</location>
-		<location id="id20" x="195" y="-195">
+		<location id="id39" x="195" y="-195">
 			<name x="213" y="-203">SensorR</name>
 			<label kind="invariant" x="136" y="-204">c&lt;=12</label>
 		</location>
-		<location id="id21" x="195" y="-42">
+		<location id="id40" x="195" y="-42">
 			<name x="221" y="-51">B1R</name>
 			<label kind="invariant" x="136" y="-51">c&lt;=12</label>
 		</location>
-		<location id="id22" x="195" y="43">
+		<location id="id41" x="195" y="43">
 			<name x="212" y="34">B2R</name>
 			<label kind="invariant" x="212" y="8">c&lt;=12</label>
 		</location>
-		<location id="id23" x="195" y="136">
+		<location id="id42" x="195" y="136">
 			<name x="170" y="102">CRL</name>
 			<label kind="invariant" x="212" y="127">c&lt;=27</label>
 		</location>
-		<location id="id24" x="365" y="42">
+		<location id="id43" x="365" y="42">
 			<name x="355" y="8">CRR</name>
 			<label kind="invariant" x="382" y="25">c&lt;=27</label>
 		</location>
-		<location id="id25" x="195" y="204">
+		<location id="id44" x="195" y="204">
 			<name x="185" y="170">DR</name>
 			<label kind="invariant" x="185" y="221">c&lt;=23</label>
 		</location>
-		<location id="id26" x="365" y="204">
+		<location id="id45" x="365" y="204">
 			<name x="355" y="170">ER</name>
 			<label kind="invariant" x="391" y="195">c&lt;=12</label>
 		</location>
-		<location id="id27" x="-331" y="306">
+		<location id="id46" x="-331" y="306">
 			<name x="-399" y="323">DeliverL</name>
 		</location>
-		<location id="id28" x="365" y="306">
+		<location id="id47" x="365" y="306">
 			<name x="365" y="323">DeliverR</name>
 		</location>
-		<location id="id29" x="25" y="306">
+		<location id="id48" x="25" y="306">
 			<name x="16" y="332">End</name>
 		</location>
-		<location id="id30" x="-170" y="-119">
+		<location id="id49" x="-170" y="-119">
 			<name x="-221" y="-127">A2L</name>
 			<label kind="invariant" x="-153" y="-127">c&lt;=2</label>
 		</location>
-		<location id="id31" x="195" y="-119">
+		<location id="id50" x="195" y="-119">
 			<name x="212" y="-127">A2R</name>
 			<label kind="invariant" x="144" y="-127">c&lt;=2</label>
 		</location>
-		<init ref="id8"/>
-		<transition id="id32">
-			<source ref="id31"/>
-			<target ref="id21"/>
+		<init ref="id27"/>
+		<transition id="id51">
+			<source ref="id48"/>
+			<target ref="id27"/>
+			<label kind="assignment" x="-500" y="463">bagColor := bagColor == BLACK ? YELLOW : BLACK</label>
+			<nail x="25" y="467"/>
+			<nail x="-518" y="459"/>
+			<nail x="-501" y="-433"/>
+			<nail x="8" y="-433"/>
+		</transition>
+		<transition id="id52">
+			<source ref="id50"/>
+			<target ref="id40"/>
 			<label kind="guard" x="144" y="-102">c==2</label>
-			<label kind="assignment" x="144" y="-85">c:=0</label>
+			<label kind="assignment" x="144" y="-85">c:=0,
+sensorValue[R] := NONE</label>
 		</transition>
-		<transition id="id33">
-			<source ref="id20"/>
-			<target ref="id31"/>
+		<transition id="id53">
+			<source ref="id39"/>
+			<target ref="id50"/>
 			<label kind="guard" x="144" y="-178">c==12</label>
-			<label kind="assignment" x="144" y="-161">c:=0</label>
+			<label kind="assignment" x="144" y="-161">c:=0,
+sensorValue[R] := INVALID</label>
 		</transition>
-		<transition id="id34">
-			<source ref="id30"/>
-			<target ref="id12"/>
+		<transition id="id54">
+			<source ref="id49"/>
+			<target ref="id31"/>
 			<label kind="guard" x="-170" y="-93">c==2</label>
-			<label kind="assignment" x="-170" y="-80">c:=0</label>
+			<label kind="assignment" x="-170" y="-80">c:=0,
+sensorValue[L] := NONE</label>
 		</transition>
-		<transition id="id35">
-			<source ref="id11"/>
-			<target ref="id30"/>
-			<label kind="guard" x="-170" y="-178">c==12</label>
-			<label kind="assignment" x="-170" y="-161">c:=0</label>
+		<transition id="id55">
+			<source ref="id30"/>
+			<target ref="id49"/>
+			<label kind="guard" x="-153" y="-178">c==12</label>
+			<label kind="assignment" x="-153" y="-161">c:=0,
+sensorValue[L] := INVALID</label>
 		</transition>
-		<transition id="id36">
-			<source ref="id8"/>
-			<target ref="id10"/>
-			<label kind="assignment" x="102" y="-323">c:=0</label>
-		</transition>
-		<transition id="id37">
+		<transition id="id56">
 			<source ref="id27"/>
 			<target ref="id29"/>
+			<label kind="synchronisation" x="59" y="-340">FeedDrop[R]?</label>
+			<label kind="assignment" x="102" y="-323">c:=0,
+sensorValue[R] := INVALID</label>
 		</transition>
-		<transition id="id38">
-			<source ref="id28"/>
-			<target ref="id29"/>
+		<transition id="id57">
+			<source ref="id46"/>
+			<target ref="id48"/>
 		</transition>
-		<transition id="id39">
-			<source ref="id17"/>
-			<target ref="id27"/>
+		<transition id="id58">
+			<source ref="id47"/>
+			<target ref="id48"/>
+		</transition>
+		<transition id="id59">
+			<source ref="id36"/>
+			<target ref="id46"/>
 			<label kind="guard" x="-382" y="255">c&gt;=10</label>
 		</transition>
-		<transition id="id40">
-			<source ref="id26"/>
-			<target ref="id28"/>
+		<transition id="id60">
+			<source ref="id45"/>
+			<target ref="id47"/>
 			<label kind="guard" x="374" y="238">c&gt;=10</label>
 		</transition>
-		<transition id="id41">
-			<source ref="id18"/>
-			<target ref="id17"/>
+		<transition id="id61">
+			<source ref="id37"/>
+			<target ref="id36"/>
 			<label kind="guard" x="-263" y="204">c&gt;=22</label>
 			<label kind="assignment" x="-297" y="204">c:=0</label>
 		</transition>
-		<transition id="id42">
-			<source ref="id19"/>
-			<target ref="id18"/>
-			<label kind="guard" x="-68" y="204">c&gt;=25</label>
-			<label kind="assignment" x="-102" y="204">c:=0</label>
+		<transition id="id62">
+			<source ref="id38"/>
+			<target ref="id37"/>
+			<label kind="guard" x="-102" y="212">c&gt;=25
+&amp;&amp; distBeltDirection == L</label>
+			<label kind="assignment" x="-136" y="212">c:=0</label>
 		</transition>
-		<transition id="id43">
-			<source ref="id25"/>
-			<target ref="id26"/>
+		<transition id="id63">
+			<source ref="id44"/>
+			<target ref="id45"/>
 			<label kind="guard" x="280" y="204">c&gt;=22</label>
 			<label kind="assignment" x="238" y="204">c:=0</label>
 		</transition>
-		<transition id="id44">
-			<source ref="id19"/>
-			<target ref="id25"/>
-			<label kind="guard" x="93" y="204">c&gt;=25</label>
+		<transition id="id64">
+			<source ref="id38"/>
+			<target ref="id44"/>
+			<label kind="guard" x="93" y="204">c&gt;=25
+&amp;&amp; distBeltDirection == R</label>
 			<label kind="assignment" x="51" y="204">c:=0</label>
 		</transition>
-		<transition id="id45">
-			<source ref="id23"/>
-			<target ref="id19"/>
+		<transition id="id65">
+			<source ref="id42"/>
+			<target ref="id38"/>
 			<label kind="guard" x="68" y="153">c&gt;=24</label>
 			<label kind="assignment" x="59" y="110">c:=0</label>
 			<nail x="76" y="136"/>
 		</transition>
-		<transition id="id46">
-			<source ref="id24"/>
-			<target ref="id26"/>
+		<transition id="id66">
+			<source ref="id43"/>
+			<target ref="id45"/>
 			<label kind="guard" x="306" y="144">c&gt;=24</label>
 			<label kind="assignment" x="281" y="170">c:=0</label>
 		</transition>
-		<transition id="id47">
-			<source ref="id22"/>
-			<target ref="id24"/>
-			<label kind="guard" x="280" y="42">c==12</label>
+		<transition id="id67">
+			<source ref="id41"/>
+			<target ref="id43"/>
+			<label kind="guard" x="280" y="42">c==12 &amp;&amp;
+distBeltDirection == R</label>
 			<label kind="assignment" x="246" y="42">c:=0</label>
 		</transition>
-		<transition id="id48">
-			<source ref="id22"/>
-			<target ref="id23"/>
-			<label kind="guard" x="127" y="59">c==12</label>
+		<transition id="id68">
+			<source ref="id41"/>
+			<target ref="id42"/>
+			<label kind="guard" x="127" y="59">c==12 &amp;&amp;
+distBeltDirection == L</label>
 			<label kind="assignment" x="119" y="76">c:=0</label>
 		</transition>
-		<transition id="id49">
-			<source ref="id16"/>
-			<target ref="id19"/>
+		<transition id="id69">
+			<source ref="id35"/>
+			<target ref="id38"/>
 			<label kind="guard" x="-76" y="144">c&gt;=24</label>
 			<label kind="assignment" x="-59" y="110">c:=0</label>
 			<nail x="-34" y="136"/>
 		</transition>
-		<transition id="id50">
-			<source ref="id13"/>
-			<target ref="id16"/>
-			<label kind="guard" x="-136" y="68">c==12</label>
+		<transition id="id70">
+			<source ref="id32"/>
+			<target ref="id35"/>
+			<label kind="guard" x="-144" y="59">c==12
+&amp;&amp; distBeltDirection == R
+&amp;&amp; distBeltDirection == bagColor</label>
 			<label kind="assignment" x="-127" y="85">c:=0</label>
 		</transition>
-		<transition id="id51">
-			<source ref="id15"/>
-			<target ref="id17"/>
+		<transition id="id71">
+			<source ref="id34"/>
+			<target ref="id36"/>
 			<label kind="guard" x="-331" y="144">c&gt;=24</label>
 			<label kind="assignment" x="-280" y="161">c:=0</label>
 		</transition>
-		<transition id="id52">
-			<source ref="id13"/>
-			<target ref="id15"/>
-			<label kind="guard" x="-289" y="51">c==12</label>
-			<label kind="assignment" x="-246" y="51">c:=0</label>
+		<transition id="id72">
+			<source ref="id32"/>
+			<target ref="id34"/>
+			<label kind="guard" x="-382" y="51">c==12 
+&amp;&amp; distBeltDirection == L
+&amp;&amp; distBeltDirection == bagColor</label>
+			<label kind="assignment" x="-288" y="34">c:=0</label>
 		</transition>
-		<transition id="id53">
-			<source ref="id14"/>
-			<target ref="id22"/>
+		<transition id="id73">
+			<source ref="id33"/>
+			<target ref="id41"/>
+			<label kind="guard" x="35" y="-21">distBeltDirection == 0</label>
+			<label kind="synchronisation" x="35" y="-4">Tick?</label>
 			<label kind="assignment" x="51" y="43">c:=0</label>
 			<nail x="93" y="34"/>
 		</transition>
-		<transition id="id54">
-			<source ref="id22"/>
-			<target ref="id14"/>
+		<transition id="id74">
+			<source ref="id41"/>
+			<target ref="id33"/>
+			<label kind="guard" x="25" y="8">distBeltDirection != bagColor</label>
 			<nail x="136" y="-8"/>
 		</transition>
-		<transition id="id55">
-			<source ref="id21"/>
-			<target ref="id22"/>
+		<transition id="id75">
+			<source ref="id40"/>
+			<target ref="id41"/>
 			<label kind="guard" x="144" y="-25">c==12</label>
 			<label kind="assignment" x="153" y="-8">c:=0</label>
 		</transition>
-		<transition id="id56">
-			<source ref="id10"/>
-			<target ref="id20"/>
-			<label kind="guard" x="153" y="-263">c==2</label>
-			<label kind="assignment" x="153" y="-246">c:=0</label>
+		<transition id="id76">
+			<source ref="id29"/>
+			<target ref="id39"/>
+			<label kind="guard" x="204" y="-254">c==2</label>
+			<label kind="assignment" x="212" y="-263">c:=0,
+sensorValue[R] := bagColor</label>
 		</transition>
-		<transition id="id57">
-			<source ref="id14"/>
-			<target ref="id13"/>
+		<transition id="id77">
+			<source ref="id33"/>
+			<target ref="id32"/>
+			<label kind="guard" x="-170" y="17">distBeltDirection == bagColor</label>
+			<label kind="synchronisation" x="-76" y="0">Tick?</label>
 			<label kind="assignment" x="-51" y="42">c:=0</label>
 			<nail x="-59" y="42"/>
 		</transition>
-		<transition id="id58">
-			<source ref="id13"/>
-			<target ref="id14"/>
+		<transition id="id78">
+			<source ref="id32"/>
+			<target ref="id33"/>
+			<label kind="guard" x="-212" y="-42">distBeltDirection != bagColor</label>
 			<nail x="-93" y="-8"/>
 		</transition>
-		<transition id="id59">
-			<source ref="id12"/>
-			<target ref="id13"/>
+		<transition id="id79">
+			<source ref="id31"/>
+			<target ref="id32"/>
 			<label kind="guard" x="-170" y="-30">c==12</label>
 			<label kind="assignment" x="-170" y="-17">c:=0</label>
 		</transition>
-		<transition id="id60">
-			<source ref="id9"/>
-			<target ref="id11"/>
-			<label kind="guard" x="-161" y="-263">c==2</label>
-			<label kind="assignment" x="-161" y="-246">c:=0</label>
+		<transition id="id80">
+			<source ref="id28"/>
+			<target ref="id30"/>
+			<label kind="guard" x="-153" y="-255">c==2</label>
+			<label kind="assignment" x="-153" y="-238">c:=0,
+sensorValue[L] := bagColor</label>
 		</transition>
-		<transition id="id61">
-			<source ref="id8"/>
-			<target ref="id9"/>
-			<label kind="assignment" x="-144" y="-314">c:=0</label>
+		<transition id="id81">
+			<source ref="id27"/>
+			<target ref="id28"/>
+			<label kind="synchronisation" x="-170" y="-331">FeedDrop[L]?</label>
+			<label kind="assignment" x="-136" y="-306">c:=0,
+sensorValue[L] := INVALID</label>
 		</transition>
 	</template>
 	<system>// Place template instantiations here.
-Process = Physical();
+//Process = Physical();
+
 // List one or more processes to be composed into a system.
-system Process;
-</system>
+//system DistributionBelt, ControlProgram, Physical, Bag;
+
+// FeedBelts
+FeedBelt1 = ControlProgram(L);
+FeedBelt2 = ControlProgram(R);
+
+//Users
+UserLeft = User(L);
+UserRight = User(R);
+
+system DistributionBelt, FeedBelt1, FeedBelt2, UserLeft, UserRight, Bag, TickGen;</system>
 	<queries>
 		<query>
 			<formula/>
