@@ -44,7 +44,7 @@ int MotorState[3] = {STOP, STOP, STOP};
 //double DONE = 0;
 
 // Test Bag spawn
-int bagColors[4] = {BLACK, BLACK, YELLOW, YELLOW};
+int bagColors[4] = {YELLOW, BLACK, YELLOW, BLACK};
 typedef int[0, 3] t_bagID;
 int feedBagsCount[2] = {0, 0};</declaration>
 	<template>
@@ -337,7 +337,10 @@ clock c;
 int feedBelt;
 
 // Bag
-int bagColor;</declaration>
+int bagColor;
+
+
+clock time;</declaration>
 		<location id="id46" x="17" y="-314">
 			<name x="-17" y="-357">Intitial</name>
 		</location>
@@ -445,6 +448,7 @@ int bagColor;</declaration>
 			<source ref="id59"/>
 			<target ref="id69"/>
 			<label kind="guard" x="128" y="-17">MotorState[MOTORB] == STOP</label>
+			<label kind="synchronisation" x="128" y="0">Tick?</label>
 			<nail x="110" y="-8"/>
 		</transition>
 		<transition id="id72">
@@ -460,6 +464,7 @@ int bagColor;</declaration>
 			<source ref="id51"/>
 			<target ref="id69"/>
 			<label kind="guard" x="-152" y="-9">MotorState[MOTORA] == STOP</label>
+			<label kind="synchronisation" x="-152" y="8">Tick?</label>
 			<nail x="-102" y="0"/>
 		</transition>
 		<transition id="id74">
@@ -499,7 +504,8 @@ sensorValue[L] := INVALID</label>
 sensorValue[R] := INVALID,
 feedBelt := R,
 bagColor := bagColors[bagID],
-feedBagsCount[R]++</label>
+feedBagsCount[R]++,
+time := 0</label>
 		</transition>
 		<transition id="id79">
 			<source ref="id64"/>
@@ -654,7 +660,8 @@ sensorValue[L] := bagColor</label>
 sensorValue[L] := INVALID,
 feedBelt := L,
 bagColor := bagColors[bagID],
-feedBagsCount[L]++</label>
+feedBagsCount[L]++,
+time := 0</label>
 		</transition>
 	</template>
 	<system>// Place template instantiations here.
@@ -678,24 +685,24 @@ UserRight = User(R);
 
 // Bag
 
-system FeedBelt1, FeedBelt2, MotorC, MotorA, MotorB, UserRight, Bag, TickGen; // UserRight</system>
+system FeedBelt1, FeedBelt2, MotorC, MotorA, MotorB, UserLeft, Bag, TickGen; // UserRight</system>
 	<queries>
 		<query>
 			<formula>A[] forall (i : int [0,3]) not ( ( Bag(i).bagColor == BLACK and Bag(i).DeliverL ) or ( Bag(i).bagColor == YELLOW and Bag(i).DeliverR ))</formula>
 			<comment>Bags are delivered at the right destination</comment>
-			<result outcome="success" type="quality" timestamp="2024-03-20 17:49:17 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-20 18:53:26 +0100">
 			</result>
 		</query>
 		<query>
 			<formula>A&lt;&gt; forall (i : int[0,3]) Bag(i).End</formula>
 			<comment>Every bag is eventually delivered</comment>
-			<result outcome="success" type="quality" timestamp="2024-03-20 17:49:17 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-20 18:53:26 +0100">
 			</result>
 		</query>
 		<query>
 			<formula>A[] collisionAreas[L] &lt; 2 and collisionAreas[R] &lt; 2</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-20 17:49:17 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-20 18:53:26 +0100">
 			</result>
 		</query>
 		<query>
@@ -705,7 +712,7 @@ system FeedBelt1, FeedBelt2, MotorC, MotorA, MotorB, UserRight, Bag, TickGen; //
 ( Bag(i).CLL or Bag(i).CLR ) and (MotorA.Stop or MotorA.Backward or MotorA.Reverse) ) and not (
 ( Bag(i).CRL or Bag(i).CRR ) and (MotorB.Stop or MotorB.Backward or MotorB.Reverse) )</formula>
 			<comment>While a bag is turning (in section c), neither the feed belt nor the distribution belt is stopped or reversed.</comment>
-			<result outcome="success" type="quality" timestamp="2024-03-20 17:49:17 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-20 18:53:26 +0100">
 			</result>
 		</query>
 		<query>
@@ -719,7 +726,7 @@ system FeedBelt1, FeedBelt2, MotorC, MotorA, MotorB, UserRight, Bag, TickGen; //
 	)
 )</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-20 17:49:17 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-20 18:53:26 +0100">
 			</result>
 		</query>
 		<query>
@@ -729,7 +736,35 @@ system FeedBelt1, FeedBelt2, MotorC, MotorA, MotorB, UserRight, Bag, TickGen; //
 ( Bag(i).F and MotorC.Reverse ) )</formula>
 			<comment>The distribution belt is never stopped or reversed when it carries a bag.
 </comment>
-			<result outcome="success" type="quality" timestamp="2024-03-20 17:49:17 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-20 18:53:26 +0100">
+			</result>
+		</query>
+		<query>
+			<formula>inf{Bag(0).DeliverL}: Bag(0).time</formula>
+			<comment/>
+			<result outcome="success" type="quantity" value="74" timestamp="2024-03-20 19:43:14 +0100">
+				<details>74</details>
+			</result>
+		</query>
+		<query>
+			<formula>inf{Bag(1).DeliverR}: Bag(1).time</formula>
+			<comment/>
+			<result outcome="success" type="quantity" value="141" timestamp="2024-03-20 19:43:14 +0100">
+				<details>141</details>
+			</result>
+		</query>
+		<query>
+			<formula>sup{Bag(2).DeliverL}: Bag(2).time</formula>
+			<comment/>
+			<result outcome="success" type="quantity" value="159" timestamp="2024-03-20 19:43:28 +0100">
+				<details>159</details>
+			</result>
+		</query>
+		<query>
+			<formula>sup{Bag(3).DeliverR}: Bag(3).time</formula>
+			<comment/>
+			<result outcome="success" type="quantity" value="153" timestamp="2024-03-20 19:43:57 +0100">
+				<details>153</details>
 			</result>
 		</query>
 	</queries>
