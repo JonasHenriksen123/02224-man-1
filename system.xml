@@ -434,81 +434,99 @@ int bagColor;</declaration>
 		<init ref="id46"/>
 		<transition id="id70">
 			<source ref="id69"/>
-			<target ref="id51"/>
-			<label kind="guard" x="-58" y="-1">MotorState[MOTORA] == FORWARD</label>
-			<label kind="synchronisation" x="-58" y="16">Tick?</label>
-			<label kind="assignment" x="-58" y="33">c := 0</label>
-			<nail x="-76" y="59"/>
+			<target ref="id59"/>
+			<label kind="guard" x="18" y="-1">MotorState[MOTORB] == FORWARD
+&amp;&amp; feedBelt == R</label>
+			<label kind="synchronisation" x="18" y="16">Tick?</label>
+			<label kind="assignment" x="18" y="33">c := 0</label>
+			<nail x="76" y="59"/>
 		</transition>
 		<transition id="id71">
+			<source ref="id59"/>
+			<target ref="id69"/>
+			<label kind="guard" x="128" y="-17">MotorState[MOTORB] == STOP</label>
+			<nail x="110" y="-8"/>
+		</transition>
+		<transition id="id72">
+			<source ref="id69"/>
+			<target ref="id51"/>
+			<label kind="guard" x="-76" y="-8">MotorState[MOTORA] == FORWARD
+&amp;&amp; feedBelt == L</label>
+			<label kind="synchronisation" x="-76" y="9">Tick?</label>
+			<label kind="assignment" x="-76" y="25">c := 0</label>
+			<nail x="-94" y="52"/>
+		</transition>
+		<transition id="id73">
 			<source ref="id51"/>
 			<target ref="id69"/>
 			<label kind="guard" x="-152" y="-9">MotorState[MOTORA] == STOP</label>
 			<nail x="-102" y="0"/>
 		</transition>
-		<transition id="id72">
+		<transition id="id74">
 			<source ref="id68"/>
 			<target ref="id58"/>
 			<label kind="guard" x="144" y="-102">c==2</label>
 			<label kind="assignment" x="144" y="-85">c:=0,
 sensorValue[R] := NONE</label>
 		</transition>
-		<transition id="id73">
+		<transition id="id75">
 			<source ref="id57"/>
 			<target ref="id68"/>
 			<label kind="guard" x="229" y="-178">c==12</label>
 			<label kind="assignment" x="229" y="-161">c:=0,
 sensorValue[R] := INVALID</label>
 		</transition>
-		<transition id="id74">
+		<transition id="id76">
 			<source ref="id67"/>
 			<target ref="id50"/>
 			<label kind="guard" x="-170" y="-93">c==2</label>
 			<label kind="assignment" x="-170" y="-80">c:=0,
 sensorValue[L] := NONE</label>
 		</transition>
-		<transition id="id75">
+		<transition id="id77">
 			<source ref="id49"/>
 			<target ref="id67"/>
 			<label kind="guard" x="-153" y="-178">c==12</label>
 			<label kind="assignment" x="-153" y="-161">c:=0,
 sensorValue[L] := INVALID</label>
 		</transition>
-		<transition id="id76">
+		<transition id="id78">
 			<source ref="id46"/>
 			<target ref="id48"/>
+			<label kind="guard" x="35" y="-331">MotorState[MOTORB] == FORWARD</label>
 			<label kind="synchronisation" x="59" y="-340">FeedDrop[bagID][R]?</label>
 			<label kind="assignment" x="102" y="-323">c:=0,
 sensorValue[R] := INVALID,
 feedBelt := R,
-bagColor := bagColors[bagID]</label>
+bagColor := bagColors[bagID],
+feedBagsCount[R]++</label>
 		</transition>
-		<transition id="id77">
+		<transition id="id79">
 			<source ref="id64"/>
 			<target ref="id66"/>
 		</transition>
-		<transition id="id78">
+		<transition id="id80">
 			<source ref="id65"/>
 			<target ref="id66"/>
 		</transition>
-		<transition id="id79">
+		<transition id="id81">
 			<source ref="id54"/>
 			<target ref="id64"/>
 			<label kind="guard" x="-382" y="255">c&gt;=10</label>
 		</transition>
-		<transition id="id80">
+		<transition id="id82">
 			<source ref="id63"/>
 			<target ref="id65"/>
 			<label kind="guard" x="374" y="238">c&gt;=10</label>
 		</transition>
-		<transition id="id81">
+		<transition id="id83">
 			<source ref="id55"/>
 			<target ref="id54"/>
 			<label kind="guard" x="-263" y="204">c&gt;=22</label>
 			<label kind="assignment" x="-297" y="204">c:=0,
 collisionAreas[L]--</label>
 		</transition>
-		<transition id="id82">
+		<transition id="id84">
 			<source ref="id56"/>
 			<target ref="id55"/>
 			<label kind="guard" x="-102" y="212">c&gt;=25
@@ -516,14 +534,14 @@ collisionAreas[L]--</label>
 			<label kind="assignment" x="-136" y="212">c:=0,
 collisionAreas[L]++</label>
 		</transition>
-		<transition id="id83">
+		<transition id="id85">
 			<source ref="id62"/>
 			<target ref="id63"/>
 			<label kind="guard" x="280" y="204">c&gt;=22</label>
 			<label kind="assignment" x="238" y="204">c:=0,
 collisionAreas[R]--</label>
 		</transition>
-		<transition id="id84">
+		<transition id="id86">
 			<source ref="id56"/>
 			<target ref="id62"/>
 			<label kind="guard" x="93" y="204">c&gt;=25
@@ -531,7 +549,7 @@ collisionAreas[R]--</label>
 			<label kind="assignment" x="51" y="204">c:=0,
 collisionAreas[R]++</label>
 		</transition>
-		<transition id="id85">
+		<transition id="id87">
 			<source ref="id60"/>
 			<target ref="id56"/>
 			<label kind="guard" x="68" y="153">c&gt;=24</label>
@@ -539,32 +557,34 @@ collisionAreas[R]++</label>
 collisionAreas[R]--</label>
 			<nail x="76" y="136"/>
 		</transition>
-		<transition id="id86">
+		<transition id="id88">
 			<source ref="id61"/>
 			<target ref="id63"/>
 			<label kind="guard" x="306" y="144">c&gt;=24</label>
 			<label kind="assignment" x="281" y="170">c:=0,
 collisionAreas[R]--</label>
 		</transition>
-		<transition id="id87">
+		<transition id="id89">
 			<source ref="id59"/>
 			<target ref="id61"/>
-			<label kind="guard" x="280" y="42">c==12 &amp;&amp;
+			<label kind="guard" x="323" y="85">c==12 &amp;&amp;
 MotorState[MOTORC] == R
 &amp;&amp; MotorState[MOTORB] == FORWARD</label>
 			<label kind="assignment" x="246" y="42">c:=0,
+feedBagsCount[R]--,
 collisionAreas[R]++</label>
 		</transition>
-		<transition id="id88">
+		<transition id="id90">
 			<source ref="id59"/>
 			<target ref="id60"/>
 			<label kind="guard" x="127" y="59">c==12 &amp;&amp;
 MotorState[MOTORC] == L
 &amp;&amp; MotorState[MOTORB] == FORWARD</label>
 			<label kind="assignment" x="119" y="76">c:=0,
+feedBagsCount[R]--,
 collisionAreas[R]++</label>
 		</transition>
-		<transition id="id89">
+		<transition id="id91">
 			<source ref="id53"/>
 			<target ref="id56"/>
 			<label kind="guard" x="-76" y="144">c&gt;=24</label>
@@ -572,7 +592,7 @@ collisionAreas[R]++</label>
 collisionAreas[L]--</label>
 			<nail x="-34" y="136"/>
 		</transition>
-		<transition id="id90">
+		<transition id="id92">
 			<source ref="id51"/>
 			<target ref="id53"/>
 			<label kind="guard" x="-144" y="59">c==12
@@ -582,14 +602,14 @@ collisionAreas[L]--</label>
 feedBagsCount[L]--,
 collisionAreas[L]++</label>
 		</transition>
-		<transition id="id91">
+		<transition id="id93">
 			<source ref="id52"/>
 			<target ref="id54"/>
 			<label kind="guard" x="-331" y="144">c&gt;=24</label>
 			<label kind="assignment" x="-280" y="161">c:=0,
 collisionAreas[L]--</label>
 		</transition>
-		<transition id="id92">
+		<transition id="id94">
 			<source ref="id51"/>
 			<target ref="id52"/>
 			<label kind="guard" x="-382" y="51">c==12 
@@ -599,33 +619,33 @@ collisionAreas[L]--</label>
 feedBagsCount[L]--,
 collisionAreas[L]++</label>
 		</transition>
-		<transition id="id93">
+		<transition id="id95">
 			<source ref="id58"/>
 			<target ref="id59"/>
 			<label kind="guard" x="144" y="-25">c &gt;=12</label>
 			<label kind="assignment" x="153" y="-8">c:=0</label>
 		</transition>
-		<transition id="id94">
+		<transition id="id96">
 			<source ref="id48"/>
 			<target ref="id57"/>
 			<label kind="guard" x="204" y="-254">c==2</label>
 			<label kind="assignment" x="212" y="-263">c:=0,
 sensorValue[R] := bagColor</label>
 		</transition>
-		<transition id="id95">
+		<transition id="id97">
 			<source ref="id50"/>
 			<target ref="id51"/>
 			<label kind="guard" x="-170" y="-30">c&gt;=12</label>
 			<label kind="assignment" x="-170" y="-17">c:=0</label>
 		</transition>
-		<transition id="id96">
+		<transition id="id98">
 			<source ref="id47"/>
 			<target ref="id49"/>
 			<label kind="guard" x="-153" y="-255">c==2</label>
 			<label kind="assignment" x="-153" y="-238">c:=0,
 sensorValue[L] := bagColor</label>
 		</transition>
-		<transition id="id97">
+		<transition id="id99">
 			<source ref="id46"/>
 			<target ref="id47"/>
 			<label kind="guard" x="-238" y="-323">MotorState[MOTORA] == FORWARD</label>
@@ -658,24 +678,24 @@ UserRight = User(R);
 
 // Bag
 
-system FeedBelt1, FeedBelt2, MotorC, MotorA, MotorB, UserLeft, Bag, TickGen; // UserRight</system>
+system FeedBelt1, FeedBelt2, MotorC, MotorA, MotorB, UserRight, Bag, TickGen; // UserRight</system>
 	<queries>
 		<query>
 			<formula>A[] forall (i : int [0,3]) not ( ( Bag(i).bagColor == BLACK and Bag(i).DeliverL ) or ( Bag(i).bagColor == YELLOW and Bag(i).DeliverR ))</formula>
 			<comment>Bags are delivered at the right destination</comment>
-			<result outcome="success" type="quality" timestamp="2024-03-20 17:34:29 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-20 17:49:17 +0100">
 			</result>
 		</query>
 		<query>
 			<formula>A&lt;&gt; forall (i : int[0,3]) Bag(i).End</formula>
 			<comment>Every bag is eventually delivered</comment>
-			<result outcome="success" type="quality" timestamp="2024-03-20 17:34:29 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-20 17:49:17 +0100">
 			</result>
 		</query>
 		<query>
 			<formula>A[] collisionAreas[L] &lt; 2 and collisionAreas[R] &lt; 2</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-20 17:34:29 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-20 17:49:17 +0100">
 			</result>
 		</query>
 		<query>
@@ -685,7 +705,7 @@ system FeedBelt1, FeedBelt2, MotorC, MotorA, MotorB, UserLeft, Bag, TickGen; // 
 ( Bag(i).CLL or Bag(i).CLR ) and (MotorA.Stop or MotorA.Backward or MotorA.Reverse) ) and not (
 ( Bag(i).CRL or Bag(i).CRR ) and (MotorB.Stop or MotorB.Backward or MotorB.Reverse) )</formula>
 			<comment>While a bag is turning (in section c), neither the feed belt nor the distribution belt is stopped or reversed.</comment>
-			<result outcome="success" type="quality" timestamp="2024-03-20 17:37:33 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-20 17:49:17 +0100">
 			</result>
 		</query>
 		<query>
@@ -699,7 +719,7 @@ system FeedBelt1, FeedBelt2, MotorC, MotorA, MotorB, UserLeft, Bag, TickGen; // 
 	)
 )</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-20 17:34:29 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-20 17:49:17 +0100">
 			</result>
 		</query>
 		<query>
@@ -709,7 +729,7 @@ system FeedBelt1, FeedBelt2, MotorC, MotorA, MotorB, UserLeft, Bag, TickGen; // 
 ( Bag(i).F and MotorC.Reverse ) )</formula>
 			<comment>The distribution belt is never stopped or reversed when it carries a bag.
 </comment>
-			<result outcome="success" type="quality" timestamp="2024-03-20 17:34:29 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-20 17:49:17 +0100">
 			</result>
 		</query>
 	</queries>
