@@ -647,19 +647,29 @@ system FeedBelt1, FeedBelt2, MotorC, MotorA, MotorB, UserLeft, Bag, TickGen; // 
 		<query>
 			<formula>A[] forall (i : int [0,3]) not ( ( Bag(i).bagColor == BLACK and Bag(i).DeliverL ) or ( Bag(i).bagColor == YELLOW and Bag(i).DeliverR ))</formula>
 			<comment>Bags are delivered at the right destination</comment>
-			<result outcome="success" type="quality" timestamp="2024-03-20 16:25:47 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-20 17:00:58 +0100">
 			</result>
 		</query>
 		<query>
 			<formula>A&lt;&gt; forall (i : int[0,3]) Bag(i).End</formula>
 			<comment>Every bag is eventually delivered</comment>
-			<result outcome="success" type="quality" timestamp="2024-03-20 16:25:49 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-20 17:00:58 +0100">
 			</result>
 		</query>
 		<query>
 			<formula>A[] collisionAreas[L] &lt; 2 and collisionAreas[R] &lt; 2</formula>
 			<comment/>
-			<result outcome="success" type="quality" timestamp="2024-03-20 16:26:46 +0100">
+			<result outcome="success" type="quality" timestamp="2024-03-20 17:00:58 +0100">
+			</result>
+		</query>
+		<query>
+			<formula>A[] forall (i : int[0,3]) not (  
+( Bag(i).CLL or Bag(i).CRL ) and (MotorC.Stop or MotorC.Backward ) ) and not (
+( Bag(i).CLR or Bag(i).CRR ) and ( MotorC.Stop or MotorC.Forward ) ) and not (
+( Bag(i).CLL or Bag(i).CRL or Bag(i).CLR or Bag(i).CRR) and (MotorA.Stop or MotorA.Backward) 
+)</formula>
+			<comment>While a bag is turning (in section c), neither the feed belt nor the distribution belt is stopped or reversed.</comment>
+			<result outcome="success" type="quality" timestamp="2024-03-20 17:00:58 +0100">
 			</result>
 		</query>
 	</queries>
