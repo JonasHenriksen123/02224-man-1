@@ -2,152 +2,199 @@
 <!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.6//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_6.dtd'>
 <nta>
 	<declaration>// Place global declarations here.
-chan SensorUnblocked, SensorBlocked;</declaration>
+const int NUMITEMS = 4;
+const int NUMBELTS = 1;
+
+// Events
+chan StartRecording[NUMBELTS], StopRecording[NUMBELTS];
+chan SensorUnblocked[NUMBELTS], SensorBlocked[NUMBELTS];
+chan ItemArrival[NUMBELTS];</declaration>
 	<template>
-		<name>VideoCamera</name>
-		<location id="id0" x="0" y="0">
-			<name x="34" y="-17">NotRecording</name>
+		<name>User</name>
+		<parameter>int beltID</parameter>
+		<declaration>clock x;
+
+int bagID = 0;</declaration>
+		<location id="id0" x="-467" y="-315">
+			<name x="-518" y="-323">Idle</name>
 		</location>
-		<location id="id1" x="0" y="68">
-			<name x="34" y="51">Recording</name>
+		<location id="id1" x="-467" y="-136">
+			<name x="-518" y="-119">Wait</name>
 		</location>
 		<init ref="id0"/>
 		<transition id="id2">
 			<source ref="id1"/>
 			<target ref="id0"/>
-			<nail x="-51" y="34"/>
+			<label kind="guard" x="-306" y="-238">x &gt;= 26</label>
+			<nail x="-314" y="-230"/>
 		</transition>
 		<transition id="id3">
 			<source ref="id0"/>
 			<target ref="id1"/>
+			<label kind="guard" x="-620" y="-263">bagID &lt; NUMITEMS</label>
+			<label kind="synchronisation" x="-637" y="-246">ItemArrival[beltID]!</label>
+			<label kind="assignment" x="-535" y="-229">x := 0,
+bagID++</label>
+		</transition>
+	</template>
+	<template>
+		<name>VideoCamera</name>
+		<parameter>int beltID</parameter>
+		<location id="id4" x="0" y="-51">
+			<name x="-119" y="-68">NotRecording</name>
+		</location>
+		<location id="id5" x="0" y="68">
+			<name x="-93" y="59">Recording</name>
+		</location>
+		<init ref="id4"/>
+		<transition id="id6">
+			<source ref="id5"/>
+			<target ref="id4"/>
+			<label kind="synchronisation" x="136" y="0">StopRecording[beltID]?</label>
+			<nail x="119" y="0"/>
+		</transition>
+		<transition id="id7">
+			<source ref="id4"/>
+			<target ref="id5"/>
+			<label kind="synchronisation" x="-195" y="-8">StartRecording[beltID]?</label>
 		</transition>
 	</template>
 	<template>
 		<name>Controller</name>
-		<location id="id4" x="-17" y="-85">
+		<declaration>clock x;</declaration>
+		<location id="id8" x="-17" y="-85">
 			<name x="8" y="-119">Idle</name>
 		</location>
-		<location id="id5" x="-17" y="-17">
+		<location id="id9" x="-17" y="-17">
 			<name x="8" y="-25">BlockedSensor</name>
 		</location>
-		<location id="id6" x="-17" y="51">
+		<location id="id10" x="-17" y="51">
 			<name x="8" y="42">UnblockedSensor</name>
 			<committed/>
 		</location>
-		<location id="id7" x="-17" y="119">
+		<location id="id11" x="-17" y="119">
 			<name x="8" y="110">Wait</name>
 		</location>
-		<location id="id8" x="-17" y="187">
+		<location id="id12" x="-17" y="187">
 			<name x="8" y="178">RecordVideo</name>
 		</location>
-		<location id="id9" x="-17" y="255">
+		<location id="id13" x="-17" y="255">
 			<name x="8" y="246">ProcessVideo</name>
+			<label kind="invariant" x="110" y="246">x &lt;= 6</label>
 		</location>
-		<location id="id10" x="-17" y="323">
+		<location id="id14" x="-17" y="323">
 			<name x="8" y="314">SendIdentification</name>
+			<committed/>
 		</location>
-		<init ref="id4"/>
-		<transition id="id11">
-			<source ref="id10"/>
-			<target ref="id4"/>
+		<init ref="id8"/>
+		<transition id="id15">
+			<source ref="id14"/>
+			<target ref="id8"/>
 			<nail x="-161" y="119"/>
 		</transition>
-		<transition id="id12">
-			<source ref="id9"/>
-			<target ref="id10"/>
-		</transition>
-		<transition id="id13">
-			<source ref="id8"/>
-			<target ref="id9"/>
-		</transition>
-		<transition id="id14">
-			<source ref="id7"/>
-			<target ref="id8"/>
-		</transition>
-		<transition id="id15">
-			<source ref="id6"/>
-			<target ref="id7"/>
-		</transition>
 		<transition id="id16">
-			<source ref="id5"/>
-			<target ref="id6"/>
+			<source ref="id13"/>
+			<target ref="id14"/>
 		</transition>
 		<transition id="id17">
-			<source ref="id4"/>
-			<target ref="id5"/>
+			<source ref="id12"/>
+			<target ref="id13"/>
+			<label kind="synchronisation" x="0" y="204">StopRecording[beltID]!</label>
+			<label kind="assignment" x="0" y="221">x := 0</label>
+		</transition>
+		<transition id="id18">
+			<source ref="id11"/>
+			<target ref="id12"/>
+			<label kind="synchronisation" x="0" y="136">StartRecording[beltID]!</label>
+		</transition>
+		<transition id="id19">
+			<source ref="id10"/>
+			<target ref="id11"/>
+		</transition>
+		<transition id="id20">
+			<source ref="id9"/>
+			<target ref="id10"/>
+			<label kind="synchronisation" x="0" y="8">SensorUnblocked[beltID]?</label>
+		</transition>
+		<transition id="id21">
+			<source ref="id8"/>
+			<target ref="id9"/>
+			<label kind="synchronisation" x="0" y="-68">SensorBlocked[beltID]?</label>
 		</transition>
 	</template>
 	<template>
 		<name>Sensor</name>
-		<location id="id18" x="-17" y="17">
-			<name x="8" y="-8">UnBlocked</name>
+		<parameter>int beltID</parameter>
+		<location id="id22" x="-17" y="-17">
+			<name x="8" y="-42">UnBlocked</name>
 		</location>
-		<location id="id19" x="-17" y="85">
+		<location id="id23" x="-17" y="85">
 			<name x="0" y="76">Blocked</name>
 		</location>
-		<init ref="id18"/>
-		<transition id="id20">
-			<source ref="id19"/>
-			<target ref="id18"/>
-			<label kind="synchronisation" x="-187" y="42">SensorUnblocked?</label>
-			<nail x="-51" y="51"/>
+		<init ref="id22"/>
+		<transition id="id24">
+			<source ref="id23"/>
+			<target ref="id22"/>
+			<label kind="synchronisation" x="-297" y="25">SensorUnblocked[beltID]?</label>
+			<nail x="-93" y="34"/>
 		</transition>
-		<transition id="id21">
-			<source ref="id18"/>
-			<target ref="id19"/>
-			<label kind="synchronisation" x="0" y="34">SensorBlocked?</label>
+		<transition id="id25">
+			<source ref="id22"/>
+			<target ref="id23"/>
+			<label kind="synchronisation" x="17" y="17">SensorBlocked[beltID]?</label>
 		</transition>
 	</template>
 	<template>
 		<name x="5" y="5">Item</name>
+		<parameter>t_itemID itemID, int beltID</parameter>
 		<declaration>// Place local declarations here.
 clock time;</declaration>
-		<location id="id22" x="-254" y="17">
-			<name x="-289" y="-34">Initial</name>
+		<location id="id26" x="-153" y="-144">
+			<name x="-136" y="-153">Initial</name>
 		</location>
-		<location id="id23" x="-153" y="17">
-			<name x="-178" y="-34">Sensor</name>
-			<label kind="invariant" x="-195" y="-17">time &lt;= 6</label>
+		<location id="id27" x="-153" y="-59">
+			<name x="-136" y="-68">Sensor</name>
+			<label kind="invariant" x="-76" y="-68">time &lt;= 6</label>
 		</location>
-		<location id="id24" x="-51" y="17">
-			<name x="-102" y="-34">Intermediate</name>
-			<label kind="invariant" x="-61" y="34">time &lt;= 5</label>
+		<location id="id28" x="-153" y="17">
+			<name x="-136" y="8">Intermediate</name>
+			<label kind="invariant" x="-25" y="8">time &lt;= 5</label>
 		</location>
-		<location id="id25" x="51" y="17">
-			<name x="17" y="-34">VideoZone</name>
-			<label kind="invariant" x="17" y="-17">time &lt;= 21</label>
+		<location id="id29" x="-153" y="110">
+			<name x="-136" y="102">VideoZone</name>
+			<label kind="invariant" x="-51" y="102">time &lt;= 21</label>
 		</location>
-		<location id="id26" x="153" y="17">
-			<name x="136" y="-34">Exit</name>
+		<location id="id30" x="-153" y="195">
+			<name x="-136" y="187">Exit</name>
 		</location>
-		<init ref="id22"/>
-		<transition id="id27">
-			<source ref="id25"/>
-			<target ref="id26"/>
-			<label kind="guard" x="59" y="42">time == 21</label>
+		<init ref="id26"/>
+		<transition id="id31">
+			<source ref="id29"/>
+			<target ref="id30"/>
+			<label kind="guard" x="-280" y="144">time == 21</label>
 		</transition>
-		<transition id="id28">
-			<source ref="id24"/>
-			<target ref="id25"/>
-			<label kind="guard" x="-42" y="51">time == 5</label>
+		<transition id="id32">
+			<source ref="id28"/>
+			<target ref="id29"/>
+			<label kind="guard" x="-280" y="59">time == 5</label>
 		</transition>
-		<transition id="id29">
-			<source ref="id23"/>
-			<target ref="id24"/>
-			<label kind="guard" x="-136" y="42">time &gt;= 2</label>
-			<label kind="synchronisation" x="-136" y="76">SensorUnblocked!</label>
-			<label kind="assignment" x="-136" y="25">time := 0</label>
+		<transition id="id33">
+			<source ref="id27"/>
+			<target ref="id28"/>
+			<label kind="guard" x="-280" y="-17">time &gt;= 2</label>
+			<label kind="synchronisation" x="-374" y="-34">SensorUnblocked[beltID]!</label>
+			<label kind="assignment" x="-374" y="-17">time := 0</label>
 		</transition>
-		<transition id="id30">
-			<source ref="id22"/>
-			<target ref="id23"/>
-			<label kind="synchronisation" x="-263" y="76">SensorBlocked!</label>
-			<label kind="assignment" x="-255" y="42">time := 0</label>
+		<transition id="id34">
+			<source ref="id26"/>
+			<target ref="id27"/>
+			<label kind="synchronisation" x="-374" y="-119">SensorBlocked[beltID]!</label>
+			<label kind="assignment" x="-374" y="-102">time := 0</label>
 		</transition>
 	</template>
 	<system>// Place template instantiations here.
 // List one or more processes to be composed into a system.
-system VideoCamera, Controller, Sensor, Item;
+system VideoCamera, Controller, Sensor, Item, User;
 </system>
 	<queries>
 		<query>
