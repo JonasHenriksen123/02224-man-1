@@ -81,11 +81,11 @@ clock stopwatch;</declaration>
 		</location>
 		<location id="id11" x="-17" y="153">
 			<name x="8" y="144">Wait</name>
-			<label kind="invariant" x="59" y="144">x &lt;= 7</label>
+			<label kind="invariant" x="59" y="144">x &lt;= 6</label>
 		</location>
 		<location id="id12" x="-17" y="263">
 			<name x="8" y="254">RecordVideo</name>
-			<label kind="invariant" x="119" y="255">x &lt;= 6</label>
+			<label kind="invariant" x="119" y="255">x &lt;= 4</label>
 		</location>
 		<location id="id13" x="-17" y="374">
 			<name x="8" y="365">ProcessVideo</name>
@@ -99,7 +99,7 @@ clock stopwatch;</declaration>
 		<transition id="id15">
 			<source ref="id14"/>
 			<target ref="id8"/>
-			<nail x="-161" y="119"/>
+			<nail x="-161" y="136"/>
 		</transition>
 		<transition id="id16">
 			<source ref="id13"/>
@@ -108,14 +108,14 @@ clock stopwatch;</declaration>
 		<transition id="id17">
 			<source ref="id12"/>
 			<target ref="id13"/>
-			<label kind="guard" x="0" y="306">x == 6</label>
+			<label kind="guard" x="0" y="306">x == 4</label>
 			<label kind="synchronisation" x="0" y="289">StopRecording!</label>
 			<label kind="assignment" x="0" y="323">x := 0</label>
 		</transition>
 		<transition id="id18">
 			<source ref="id11"/>
 			<target ref="id12"/>
-			<label kind="guard" x="0" y="195">x == 7</label>
+			<label kind="guard" x="0" y="195">x == 6</label>
 			<label kind="synchronisation" x="0" y="178">StartRecording!</label>
 			<label kind="assignment" x="0" y="212">x := 0</label>
 		</transition>
@@ -269,14 +269,14 @@ system Controller, Item, User;
 		<query>
 			<formula>A&lt;&gt; forall (i : int[0,3]) Item(i).End</formula>
 			<comment>Every Item is eventually delivered</comment>
-			<result outcome="success" type="quality" timestamp="2024-05-20 13:06:31 +0200">
+			<result outcome="success" type="quality" timestamp="2024-05-20 13:10:43 +0200">
 			</result>
 		</query>
 		<query>
 			<formula>sup{Controller.SendIdentification}: Controller.stopwatch</formula>
 			<comment>Smallest possible item arrival distance while recording correctly</comment>
-			<result outcome="success" type="quantity" value="25" timestamp="2024-05-20 13:06:31 +0200">
-				<details>25</details>
+			<result outcome="success" type="quantity" value="22" timestamp="2024-05-20 13:10:43 +0200">
+				<details>22</details>
 			</result>
 		</query>
 	</queries>
