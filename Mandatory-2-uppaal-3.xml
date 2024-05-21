@@ -7,17 +7,17 @@ urgent chan go;
 
 
 // Process identifiers (determines priority, 0 highest priority)
-const int N = 2;
+const int N = 4;
 typedef int[0,N-1] PID;
 typedef int[0,N]   ExtPID;    // Extended PID using N for idle process
 
 
-bool Out[2] = {false, false};	// Output line
+bool Out[N] = {false, false, false, false};	// Output line
 
 // Scheduling parameters (only used by process 0)
-const int T[PID] = {3, 6};		// Periods 
-const int D[PID] = {3, 6};
-const int C[PID] = {2, 0};		// Execution times 
+const int T[PID] = {3, 6, 6, 6};		// Periods 
+const int D[PID] = {3, 6, 6, 6};
+const int C[PID] = {2, 0, 0, 0};		// Execution times 
 
 const int MaxC  =  6;			// Maximum cputime used
 const int DELTA = -1;                   // Special CPU-time indicating a preemptable (almost) zero value
@@ -209,156 +209,6 @@ clock z;    // For sleeping period</declaration>
 		</transition>
 	</template>
 	<template>
-		<name>Periodic</name>
-		<parameter>PID id</parameter>
-		<declaration>clock x;		// For periodic releases
-</declaration>
-		<location id="id35" x="-512" y="-224">
-			<name x="-522" y="-254">README</name>
-			<label kind="comments" x="-522" y="-189">Traditional periodic process which may interfere other activitives.</label>
-		</location>
-		<location id="id36" x="-256" y="-32">
-			<name x="-240" y="-56">Processing</name>
-		</location>
-		<location id="id37" x="-416" y="-32" color="#ff0000">
-			<name x="-472" y="-64">Error</name>
-		</location>
-		<location id="id38" x="-256" y="96">
-			<name x="-312" y="72">Done</name>
-			<label kind="invariant" x="-240" y="104">x &lt;= T[id]</label>
-		</location>
-		<location id="id39" x="-416" y="-160">
-		</location>
-		<location id="id40" x="-256" y="-160">
-			<name x="-288" y="-200">Released</name>
-			<committed/>
-		</location>
-		<init ref="id39"/>
-		<transition id="id41">
-			<source ref="id36"/>
-			<target ref="id38"/>
-			<label kind="guard" x="-248" y="0">need[id] == 0</label>
-			<label kind="synchronisation" x="-248" y="16">go?</label>
-		</transition>
-		<transition id="id42">
-			<source ref="id36"/>
-			<target ref="id37"/>
-			<label kind="guard" x="-368" y="-56">x &gt; D[id]</label>
-		</transition>
-		<transition id="id43">
-			<source ref="id38"/>
-			<target ref="id40"/>
-			<label kind="guard" x="-192" y="72">x== T[id]</label>
-			<nail x="96" y="96"/>
-			<nail x="96" y="-160"/>
-		</transition>
-		<transition id="id44">
-			<source ref="id39"/>
-			<target ref="id40"/>
-		</transition>
-		<transition id="id45">
-			<source ref="id40"/>
-			<target ref="id36"/>
-			<label kind="assignment" x="-248" y="-104">need[id] = C[id], x = 0</label>
-		</transition>
-	</template>
-	<template>
-		<name>PulseGen</name>
-		<parameter>PID id, const int W, const int T, bool &amp;X</parameter>
-		<declaration>clock x;		// For periodic releases
-clock y;		// For measuring pulse duration
-clock z;                // For sleeping period</declaration>
-		<location id="id46" x="-256" y="32">
-			<name x="-320" y="8">Sleep</name>
-			<label kind="invariant" x="-232" y="24">z &lt;= W</label>
-		</location>
-		<location id="id47" x="0" y="160" color="#ff0000">
-			<name x="-16" y="128">Error</name>
-		</location>
-		<location id="id48" x="-256" y="160">
-			<name x="-320" y="136">Done</name>
-			<committed/>
-		</location>
-		<location id="id49" x="-256" y="96" color="#ffa500">
-			<name x="-320" y="80">Reset</name>
-		</location>
-		<location id="id50" x="-256" y="-32" color="#ffa500">
-			<name x="-344" y="-48">Call_wait</name>
-		</location>
-		<location id="id51" x="-512" y="-224">
-			<name x="-522" y="-254">README</name>
-			<label kind="comments" x="-510" y="-246">Generates a pulse of width W every T units on the X line.
-This does not use any significant resources, but has to be scheduled anyhow. This is modelled by using a cpu need of DELTA.</label>
-		</location>
-		<location id="id52" x="-256" y="-96" color="#ffa500">
-			<name x="-304" y="-120">Set</name>
-			<label kind="comments" x="-266" y="-61">Models X := true</label>
-		</location>
-		<location id="id53" x="-256" y="224">
-			<name x="-400" y="192">Await_next_period</name>
-			<label kind="invariant" x="-280" y="240">x &lt;= T</label>
-		</location>
-		<location id="id54" x="-416" y="-160">
-			<urgent/>
-		</location>
-		<location id="id55" x="-256" y="-160">
-			<name x="-288" y="-200">Released</name>
-			<committed/>
-		</location>
-		<init ref="id54"/>
-		<transition id="id56">
-			<source ref="id50"/>
-			<target ref="id46"/>
-			<label kind="guard" x="-240" y="-16">run[id]</label>
-			<label kind="assignment" x="-176" y="-16">z = 0, need[id] = 0</label>
-		</transition>
-		<transition id="id57">
-			<source ref="id48"/>
-			<target ref="id47"/>
-			<label kind="guard" x="-144" y="168">x &gt; T</label>
-		</transition>
-		<transition id="id58">
-			<source ref="id48"/>
-			<target ref="id53"/>
-			<label kind="guard" x="-248" y="176">x &lt;= T</label>
-		</transition>
-		<transition id="id59">
-			<source ref="id49"/>
-			<target ref="id48"/>
-			<label kind="guard" x="-240" y="112">run[id]</label>
-			<label kind="assignment" x="-176" y="112">X = 0, need[id] = 0</label>
-		</transition>
-		<transition id="id60">
-			<source ref="id46"/>
-			<target ref="id49"/>
-			<label kind="guard" x="-240" y="48">z == W</label>
-			<label kind="assignment" x="-176" y="48">need[id] = DELTA</label>
-		</transition>
-		<transition id="id61">
-			<source ref="id52"/>
-			<target ref="id50"/>
-			<label kind="guard" x="-240" y="-80">run[id]</label>
-			<label kind="assignment" x="-176" y="-80">X = 1, y =0</label>
-			<label kind="comments" x="-316" y="-34">May end processing before actually having used all needed time.</label>
-		</transition>
-		<transition id="id62">
-			<source ref="id53"/>
-			<target ref="id55"/>
-			<label kind="guard" x="-184" y="232">x== T</label>
-			<nail x="96" y="224"/>
-			<nail x="96" y="-160"/>
-		</transition>
-		<transition id="id63">
-			<source ref="id54"/>
-			<target ref="id55"/>
-		</transition>
-		<transition id="id64">
-			<source ref="id55"/>
-			<target ref="id52"/>
-			<label kind="assignment" x="-240" y="-136">need[id] = DELTA, x = 0</label>
-		</transition>
-	</template>
-	<template>
 		<name>Scheduler</name>
 		<declaration>/*
   Fixed priority scheduler for a uni-processor.
@@ -423,79 +273,79 @@ void decrement(ExtPID pid)
     //else need == DELTA or need == INF 
 }
 </declaration>
-		<location id="id65" x="96" y="-128" color="#ffa500">
+		<location id="id35" x="96" y="-128" color="#ffa500">
 			<name x="120" y="-144">Run_delta</name>
 			<label kind="invariant" x="112" y="-120">x &lt; 1</label>
 			<urgent/>
 		</location>
-		<location id="id66" x="-160" y="-224">
+		<location id="id36" x="-160" y="-224">
 			<committed/>
 		</location>
-		<location id="id67" x="-416" y="-128">
+		<location id="id37" x="-416" y="-128">
 			<name x="-544" y="-136">TimesliceDone</name>
 			<committed/>
 		</location>
-		<location id="id68" x="-160" y="32">
+		<location id="id38" x="-160" y="32">
 			<name x="-192" y="72">Reschedule</name>
 			<label kind="invariant" x="-176" y="48">x &lt; 1</label>
 			<label kind="comments" x="-170" y="67">Invariant ensures that all processes which are done are handled before a reschedule is attempted.</label>
 			<committed/>
 		</location>
-		<location id="id69" x="-160" y="-128">
+		<location id="id39" x="-160" y="-128">
 			<name x="-152" y="-168">Run</name>
 			<label kind="invariant" x="-176" y="-104">x&lt;=1</label>
 		</location>
-		<init ref="id66"/>
-		<transition id="id70">
-			<source ref="id65"/>
-			<target ref="id68"/>
+		<init ref="id36"/>
+		<transition id="id40">
+			<source ref="id35"/>
+			<target ref="id38"/>
 			<label kind="guard" x="-80" y="40">maxprio() != current || need[current] != DELTA</label>
 			<nail x="96" y="32"/>
 		</transition>
-		<transition id="id71">
-			<source ref="id66"/>
-			<target ref="id69"/>
+		<transition id="id41">
+			<source ref="id36"/>
+			<target ref="id39"/>
 			<label kind="assignment" x="-152" y="-200">initialize()</label>
 		</transition>
-		<transition id="id72">
-			<source ref="id69"/>
-			<target ref="id68"/>
+		<transition id="id42">
+			<source ref="id39"/>
+			<target ref="id38"/>
 			<label kind="guard" x="-360" y="-64">maxprio() != current</label>
 			<label kind="synchronisation" x="-256" y="-48">go?</label>
 			<nail x="-192" y="-96"/>
 			<nail x="-192" y="0"/>
 		</transition>
-		<transition id="id73">
-			<source ref="id67"/>
-			<target ref="id69"/>
+		<transition id="id43">
+			<source ref="id37"/>
+			<target ref="id39"/>
 			<label kind="guard" x="-416" y="-216">need[current] != 0</label>
 			<nail x="-416" y="-192"/>
 			<nail x="-224" y="-192"/>
 		</transition>
-		<transition id="id74">
-			<source ref="id68"/>
-			<target ref="id69"/>
+		<transition id="id44">
+			<source ref="id38"/>
+			<target ref="id39"/>
 			<label kind="assignment" x="-112" y="-72">run[current] = false,
 current = maxprio(),
 run[current] = true</label>
 			<nail x="-128" y="0"/>
 			<nail x="-128" y="-96"/>
 		</transition>
-		<transition id="id75">
-			<source ref="id69"/>
-			<target ref="id65"/>
+		<transition id="id45">
+			<source ref="id39"/>
+			<target ref="id35"/>
 			<label kind="guard" x="-80" y="-168">need[current]==DELTA</label>
 			<label kind="synchronisation" x="-16" y="-152">go?</label>
 		</transition>
-		<transition id="id76">
-			<source ref="id67"/>
-			<target ref="id68"/>
+		<transition id="id46">
+			<source ref="id37"/>
+			<target ref="id38"/>
 			<label kind="guard" x="-400" y="40">need[current]==0</label>
 			<nail x="-416" y="32"/>
 		</transition>
-		<transition id="id77">
-			<source ref="id69"/>
-			<target ref="id67"/>
+		<transition id="id47">
+			<source ref="id39"/>
+			<target ref="id37"/>
 			<label kind="guard" x="-344" y="-152">x==1</label>
 			<label kind="assignment" x="-392" y="-120">x=0, decrement(current)</label>
 		</transition>
@@ -506,9 +356,10 @@ run[current] = true</label>
 
 //Worker  = Periodic(0);			// Periodic process
 //Pulser  = PulseGen(1, 1, 6, Out);	// Generates a pulse on the Out line
-Belt1 = Belt(0, 2, 6, 0, Out[0]);
-Belt2 = Belt(1, 2, 2, 15, Out[1]);
-
+Belt1 = Belt(0, 6, 6, 0, Out[0]);
+Belt2 = Belt(1, 6, 6, 0, Out[1]);
+Belt3 = Belt(2, 6, 6, 6, Out[2]);
+Belt4 = Belt(3, 6, 6, 0, Out[3]);
 system Scheduler, Belt1, Belt2, Dummy;</system>
 	<queries>
 		<query>
@@ -516,7 +367,7 @@ system Scheduler, Belt1, Belt2, Dummy;</system>
 			</formula>
 			<comment>Sanity check: system should not enter a (time-) deadlock
 			</comment>
-			<result outcome="success" type="quality" timestamp="2024-05-20 20:40:28 +0200">
+			<result outcome="success" type="quality" timestamp="2024-05-21 11:41:49 +0200">
 			</result>
 		</query>
 		<query>
@@ -524,13 +375,13 @@ system Scheduler, Belt1, Belt2, Dummy;</system>
 			</formula>
 			<comment>Check that the pulse generation does not exceed its period.
 			</comment>
-			<result outcome="success" type="quality" timestamp="2024-05-20 20:40:28 +0200">
+			<result outcome="success" type="quality" timestamp="2024-05-21 11:41:49 +0200">
 			</result>
 		</query>
 		<query>
 			<formula>A[] not Belt2.Error</formula>
 			<comment/>
-			<result outcome="failure" type="quality" timestamp="2024-05-20 20:40:28 +0200">
+			<result outcome="failure" type="quality" timestamp="2024-05-21 11:41:49 +0200">
 			</result>
 		</query>
 	</queries>
